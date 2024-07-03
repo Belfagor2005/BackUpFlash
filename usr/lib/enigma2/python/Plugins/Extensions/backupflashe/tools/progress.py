@@ -1,27 +1,32 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 # RAED & mfaraj57 &  (c) 2018
 # Code RAED & mfaraj57
 
 # python3
 from __future__ import print_function
-
-from enigma import eConsoleAppContainer, eTimer
-from Screens.Screen import Screen
 from Components.ActionMap import ActionMap
-from Components.ScrollLabel import ScrollLabel
-from Screens.MessageBox import MessageBox
+from Components.Pixmap import Pixmap
 from Components.ProgressBar import ProgressBar
+from Components.ScrollLabel import ScrollLabel
 from Components.Slider import Slider
+from Screens.MessageBox import MessageBox
+from Screens.Screen import Screen
 from Screens.Standby import TryQuitMainloop
-from Tools.Directories import resolveFilename, SCOPE_PLUGINS
+from Tools.Directories import (resolveFilename, SCOPE_PLUGINS)
+from enigma import eConsoleAppContainer, eTimer
+from enigma import getDesktop
 import os
+from .bftools import getversioninfo
 from .skin import *
-from .bftools import logdata, copylog, getboxtype, getimage_name
+from .bftools import (copylog, getboxtype, trace_error)
 
+Ver, lastbuild, enigmaos = getversioninfo()
 backup_progress = 0
 flash_progress = 0
-imagename = getimage_name()
+sz_w = getDesktop(0).size().width()
+
 
 def rootspace():
     try:
@@ -31,13 +36,37 @@ def rootspace():
         fspace = round(float(available / 1048576.0), 2)
         tspace = round(float(capacity / 1048576.0), 1)
         spacestr = 'Free space(' + str(fspace) + 'MB) Total space(' + str(tspace) + 'MB)'
-        rused=capacity-available
+        rused = capacity - available
         return rused
     except:
         return
 
+
+if sz_w == 1280:  # progress screen
+    SKIN_Progress = """
+                    <screen name="Progress..." position="center,center"  size="550,178" title="Downloading image..." backgroundColor="#16000000" flags="wfNoBorder">
+                        <widget source="Title" render="Label" font="Regular;24" foregroundColor="#00bab329" backgroundColor="#16000000" position="10,5" size="530,25" transparent="1"/>
+                        <eLabel text="" position="10,31" zPosition="3" size="531,1" font="Regular;5" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#00ffffff"/>
+                        <widget name="text" position="10,32" size="530,75" font="Regular;18" backgroundColor="#16000000"/>
+                        <eLabel text="Press Exit Button to cancel BackUp job" position="10,108" zPosition="2" size="531,26" font="Regular;22" halign="center" valign="center" foregroundColor="#00ff2525" backgroundColor="#16000000"/>
+                        <eLabel text="Press Ok Button to Hide/Show Screen" position="10,133" zPosition="2" size="531,26" font="Regular;22" halign="center" valign="center" foregroundColor="#00bab329" backgroundColor="#16000000"/>
+                        <widget name="slider" position="0,162" size="550,15" borderWidth="1" transparent="1" />
+                    </screen>"""
+else:
+    SKIN_Progress = """
+                    <screen name="Progress..." position="center,center" size="850,259" title="Downloading image..." backgroundColor="#16000000" flags="wfNoBorder">
+                        <widget source="Title" render="Label" font="Regular;30" foregroundColor="#00bab329" backgroundColor="#16000000" position="20,5" size="815,35" transparent="1"/>
+                        <eLabel text="" position="20,41" zPosition="3" size="815,2" font="Regular;5" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#00ffffff"/>
+                        <widget name="text" position="20,45" size="815,115" font="Regular;28" backgroundColor="#16000000"/>
+                        <eLabel text="Press Exit Button to cancel BackUp job" position="32,163" zPosition="2" size="784,35" font="Regular;28" halign="center" valign="center" foregroundColor="#00ff2525" backgroundColor="#16000000"/>
+                        <eLabel text="Press Ok Button to Hide/Show Screen" position="32,200" zPosition="2" size="784,35" font="Regular;28" halign="center" valign="center" foregroundColor="#00bab329" backgroundColor="#16000000"/>
+                        <widget name="slider" position="0,238" size="850,20" borderWidth="1" transparent="1"/>
+                    </screen>"""
+
+
 class ProgressScreen(Screen):
-    def __init__(self, session, title = 'Console', cmdlist = None, finishedCallback = None, closeOnSuccess = False, endstr = '', imagePath = ''):
+
+    def __init__(self, session, title='Console', cmdlist=None, finishedCallback=None, closeOnSuccess=False, endstr='', imagePath=''):
         Screen.__init__(self, session)
         self.skin = SKIN_Progress
         self.session = session
@@ -46,7 +75,7 @@ class ProgressScreen(Screen):
         else:
             self.processType = 'flash'
         st = os.statvfs('/')
-        self.root_size =(st.f_blocks - st.f_bfree) * st.f_frsize
+        self.root_size = (st.f_blocks - st.f_bfree) * st.f_frsize
         self.endstr = endstr
         self.imagePath = str(imagePath).strip()
         try:
@@ -83,9 +112,9 @@ class ProgressScreen(Screen):
         self.setTitle(self.newtitle)
 
     def checkflashProgress(self):
-        self.image_size=0
+        self.image_size = 0
         self.flashingtime = self.flashingtime + 10
-        if self.process_finished == False:
+        if self.process_finished is False:
             rsize = 0
             tarimage = '%s/tmp/rootfs.tar' % self.device_path
             try:
@@ -99,26 +128,26 @@ class ProgressScreen(Screen):
                 trace_error()
                 pass
             boxtype = getboxtype()
-            gfactor=1
-            xfactor=1
+            gfactor = 1
+            xfactor = 1
             if boxtype == 'dm520':
-                gfactor=.23
-                xfactor=.6
-            elif boxtype == 'dm900' or boxtype=='dm920':
-                gfactor=.43
-                xfactor=.26
-            else: #dm820,dm7080
-                gfactor=3
-                xfactor=4.5
+                gfactor = .23
+                xfactor = .6
+            elif boxtype == 'dm900' or boxtype == 'dm920':
+                gfactor = .43
+                xfactor = .26
+            else:  # dm820,dm7080
+                gfactor = 3
+                xfactor = 4.5
             self.setTitle('Extracting ' + str(float(self.tarimage_size / 1067008)) + ' MB')
-            gfactor=.3
-            xfactor=.3
+            gfactor = .3
+            xfactor = .3
             if self.tarimage_size > 0:
                 if self.imagePath.endswith(".gz"):
-                   flash_progress=int(100*gfactor*self.tarimage_size /self.image_size)
+                    flash_progress = int(100 * gfactor * self.tarimage_size / self.image_size)
                 else:
-                   flash_progress=int(100*xfactor*self.tarimage_size /self.image_size)
-                self.slider.setValue( flash_progress)
+                    flash_progress = int(100 * xfactor * self.tarimage_size / self.image_size)
+                self.slider.setValue(flash_progress)
                 self.TimerFlashing.start(1000, True)
         else:
             flash_progress_progress = 0
@@ -129,22 +158,22 @@ class ProgressScreen(Screen):
         global backup_progress
         self.backuptime = self.backuptime + 2
         boxtype = getboxtype()
-        if self.process_finished == False:
+        if self.process_finished is False:
             rsize = 0
             try:
                 self.image_size = os.path.getsize(self.imagePath)
             except:
-                self.image_size=0
+                self.image_size = 0
             root_size = self.root_size
             gfactor = 1
             xfactor = 1
-            if boxtype == 'dm520':             
+            if boxtype == 'dm520':
                 gfactor = 4.20
                 xfactor = 4.12
-            elif boxtype == 'dm900' or boxtype=='dm920':
+            elif boxtype == 'dm900' or boxtype == 'dm920':
                 gfactor = 3
                 xfactor = 4.5
-            else: #dm820,dm7080
+            else:  # dm820, dm7080
                 gfactor = 3.3
                 xfactor = 5
             if self.root_size < 1:
@@ -152,11 +181,11 @@ class ProgressScreen(Screen):
                 backup_progress = 3
             if self.image_size > 0:
                 if self.imagePath.endswith(".gz"):
-                   backup_progress =  int(550*gfactor*self.image_size /(root_size))
+                    backup_progress = int(100 * gfactor * self.image_size / (root_size))
                 else:
-                   backup_progress =  int(500*xfactor*self.image_size /(root_size))
-                self.setTitle('Backup ' + str(int(float(self.image_size / 1067008)))+" MB")
-                self.slider.setValue( backup_progress)
+                    backup_progress = int(100 * xfactor * self.image_size / (root_size))
+                self.setTitle('Backup ' + str(int(float(self.image_size / 1067008))) + " MB")
+                self.slider.setValue(backup_progress)
             self.TimerBackup.start(2000, True)
         else:
             backup_progress = 0
@@ -183,7 +212,7 @@ class ProgressScreen(Screen):
             else:
                 self.TimerBackup.callback.append(self.checkbackupProgress)
             self.TimerBackup.start(10000, True)
-            startstr = 'Backup started for (%s)' % imagename.replace("Backup-","")
+            startstr = 'Backup started'
         else:
             self.flashingtime = 0
             self.TimerFlashing = eTimer()
@@ -216,15 +245,15 @@ class ProgressScreen(Screen):
                 self['text'].setText(str)
             else:
                 str += _('Backup finished!!\nPress exit Button')
-                #print('[backupflash] found finished process ...')
+                print('[backupflash] found finished process ...')
             if os.path.exists('/tmp/bbackup.scr'):
                 os.remove('/tmp/bbackup.scr')
-            if retval :
-                tarimage="%s/tmp/rootfs.tar" % self.device_path
+            if retval:
+                tarimage = "%s/tmp/rootfs.tar" % self.device_path
                 if os.path.exists(self.imagePath):
-                     os.remove(self.imagePath)
+                    os.remove(self.imagePath)
                 if os.path.exists(tarimage):
-                     os.remove(tarimage)
+                    os.remove(tarimage)
             copylog(self.device_path)
             backupflash_progress = 0
             self.slider.setValue(0)
@@ -237,11 +266,10 @@ class ProgressScreen(Screen):
             print('finished process')
             self['text'].setText(str)
             self['text'].lastPage()
-            if self.finishedCallback != None:
+            if self.finishedCallback is not None:
                 self.finishedCallback(retval)
             if not retval and self.closeOnSuccess:
                 self.cancel()
-            self.cancel()
         return
 
     def hideshow(self):
@@ -265,8 +293,7 @@ class ProgressScreen(Screen):
             self.session.openWithCallback(self.abort, MessageBox, _('Are you sure to cancel %s' % self.processType), MessageBox.TYPE_YESNO)
         return
 
-    def abort(self, answer = False):
-        os.system("touch /tmp/.cancelBackup")
+    def abort(self, answer=False):
         PLUGINROOT = resolveFilename(SCOPE_PLUGINS, 'Extensions/backupflashe')
         PLUGINBACKUP = resolveFilename(SCOPE_PLUGINS, 'Extensions/dBackup')
         if answer:
@@ -276,8 +303,8 @@ class ProgressScreen(Screen):
             self.container.sendEOF()
             if os.path.exists(PLUGINBACKUP):
                 os.system('mv %s %s' % (PLUGINBACKUP, PLUGINROOT))
-            #if os.path.exists(self.imagePath): #these lines delete image from path of image (not recommanded)
-            #    os.remove(self.imagePath)
+            # if os.path.exists(self.imagePath):  # these lines delete image from path of image (not recommanded)
+                # os.remove(self.imagePath)
             if os.path.exists(tarimage):
                 os.remove(tarimage)
             try:
@@ -289,8 +316,8 @@ class ProgressScreen(Screen):
             self.close()
 
     def dataAvail(self, str):
-        self['text'].setText(self['text'].getText()) ## PY3
-        #self['text'].setText(self['text'].getText() + str)
+        self['text'].setText(self['text'].getText())  # PY3
+        # self['text'].setText(self['text'].getText() + str)
 
     def processAnswer(self, retval):
         if retval:

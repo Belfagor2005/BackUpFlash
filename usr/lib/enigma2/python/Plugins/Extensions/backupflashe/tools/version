@@ -1,5 +1,8 @@
 # This Plugin to make Backup and Flash image Open/DreamOS source
-# Code by RAED(fairbird) and mfaraj57
+# Code by RAED(fairbird) and mfaraj57 
+# Thank you (gutemine) for swaproot tools
 # Support (www.tunisia-sat.com)
 
-version=9.0
+version=6.1
+lastbuild=03-03-2022
+enigmaos=all
