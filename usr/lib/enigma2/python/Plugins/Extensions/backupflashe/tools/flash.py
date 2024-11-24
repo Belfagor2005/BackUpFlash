@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 # RAED & mfaraj57 &  (c) 2018
 # Code RAED & mfaraj57
 
 # python3
 from __future__ import print_function
+
 from Components.ActionMap import ActionMap
 from Components.Label import Label
 from Screens.MessageBox import MessageBox
@@ -14,10 +14,9 @@ from Components.MenuList import MenuList
 from Tools.Directories import fileExists
 from enigma import eTimer
 import os
-
 from .progress import ProgressScreen
 from .skin import *
-from .bftools import (logdata, getboxtype, getversioninfo, copylog)
+from .bftools import logdata, getboxtype, getversioninfo, copylog
 
 Ver, lastbuild, enigmaos = getversioninfo()
 logfile = "/tmp/backupflash.log"
@@ -115,8 +114,8 @@ class doFlash(Screen):
         self['path'] = Label(device_path)
         self.device_path = device_path
         self['actions'] = ActionMap(['WizardActions', 'ColorActions'], {'red': self.close,
-         'green': self.doFlash,
-         'back': self.close})
+                                     'green': self.doFlash,
+                                     'back': self.close})
         self['key_green'].hide()
         self.images = []
         self.timer = eTimer()
@@ -190,6 +189,6 @@ class doFlash(Screen):
                 return
         except:
             pass
-        # command = flashScript(IMAGENAME, self.device_path)
+        command = flashScript(IMAGENAME, self.device_path)
         script_backupflash = "/tmp/backupflash.sh"
         self.session.open(ProgressScreen, title=mytitle, cmdlist=[script_backupflash], endstr="Swapping image to root started,box will reboot in a moment,please wait...", imagePath=IMAGEPATH)

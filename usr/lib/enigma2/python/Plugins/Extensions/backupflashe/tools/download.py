@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 # RAED & mfaraj57 &  (c) 2018
 # Code RAED & mfaraj57
 
@@ -38,13 +37,13 @@ class imagedownloadScreen(Screen):
         self['status'] = Label()
         self['package'] = Label()
         if self.canflash:
-            self['key_green'] = Label('Press Green Button to Flash image')
+            self['key_green'] = Label('Download image Finished. Press Exit !!')
         else:
             self['key_green'] = Label(' ')
         self['key_green'].hide()
         self['actions'] = ActionMap(['OkCancelActions', 'ColorActions'], {'green': self.doFlash,
-          'ok': self.okclicked,
-          'cancel': self.dexit}, -1)
+                                     'ok': self.okclicked,
+                                     'cancel': self.dexit}, -1)
         self['status'].setText(_('Waiting to get resouces free...'))
         self.downloading = False
         self.downloader = None
@@ -77,10 +76,10 @@ class imagedownloadScreen(Screen):
         self.setTitle(_('Downloading') + ' ' + str(p) + '%...')
 
     def responseCompleted(self, data=None):
-        print('[BackUpFlash downloader] Download succeeded.')
+        print('[BackUpFlash downloader] Download succeeded. ')
         logdata("download data", str(data))
         logdata("download status", "Download succeeded.")
-        info = 'Download completed successfully,press (green) to start flashing   '
+        info = 'Download completed successfully, Press (Exit) to go back'
         self['status'].setText(info)
         self.setTitle(_('Download completed successfully.'))
         self.downloading = False
@@ -117,7 +116,6 @@ class imagedownloadScreen(Screen):
             copylog(path)
         except:
             pass
-
         if self.downloading:
             self.session.openWithCallback(self.abort, MessageBox, _('Are you sure to stop download.'), MessageBox.TYPE_YESNO)
         else:

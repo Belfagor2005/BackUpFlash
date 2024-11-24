@@ -1,371 +1,345 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-# RAED & mfaraj57 &  (c) 2018
+# RAED & mfaraj57 &	 (c) 2018
 # Code RAED & mfaraj57
 
-# python3
-from __future__ import print_function
+from .compat import compat_Request, compat_urlopen, PY3
 from Components.About import about
-from Tools.Directories import (fileExists, copyfile, resolveFilename, SCOPE_PLUGINS)
-import os
-import traceback
-import re
+from Tools.Directories import fileExists, copyfile, resolveFilename, SCOPE_PLUGINS
+import datetime
 import json
+import os
+import re
 import sys
-from .compat import compat_Request, compat_urlopen
+import traceback
 
 logfile = "/tmp/backupflash.log"
 backupflash_script = "/tmp/backupflash.sh"
 
+
 if not fileExists('/usr/lib64'):
-    LIBPATH = '/usr/lib'
+	LIBPATH = '/usr/lib'
 else:
-    LIBPATH = '/usr/lib64'
+	LIBPATH = '/usr/lib64'
 
 
-def logdata(label='', data=None):
-    try:
-        bfile = open(logfile, 'a')
-        bfile.write(str(label) + ' : ' + str(data) + "\n")
-        bfile.close()
-    except:
-        pass
+def logdata(label='', data=None, logfile='logfile.log'):
+	"""
+	Logs a label and associated data to a specified log file.
+
+	Args:
+		label (str): The label for the log entry.
+		data (any): The data to log.
+		logfile (str): The path to the log file. Defaults to 'logfile.log'.
+	"""
+	try:
+		with open(logfile, 'a') as log_file:
+			log_file.write(str(label) + ' : ' + str(data) + "\n")
+	except Exception as e:
+		print("Failed to write to log file:", e)
 
 
 def dellog():
-    if os.path.exists(logfile):
-        os.remove(logfile)
+	if os.path.exists(logfile):
+		os.remove(logfile)
 
 
 def copylog(device_path):
-    try:
-        logfile2 = os.path.join(device_path, "backupflash.log")
-        backupflash_script2 = os.path.join(device_path, "backupflash.sh")
-        if os.path.exists(logfile2):
-            os.remove(logfile2)
-        copyfile(logfile, logfile2)
-        copyfile(backupflash_script, backupflash_script2)
-    except:
-        pass
+	try:
+		# Costruzione dei percorsi nella destinazione
+		logfile2 = os.path.join(device_path, "backupflash.log")
+		backupflash_script2 = os.path.join(device_path, "backupflash.sh")
+
+		# Controllo esistenza del file sorgente e destinazione
+		if os.path.exists(logfile2):
+			os.remove(logfile2)
+
+		if os.path.exists(logfile) and os.path.isfile(logfile):
+			copyfile(logfile, logfile2)
+
+		if os.path.exists(backupflash_script) and os.path.isfile(backupflash_script):
+			copyfile(backupflash_script, backupflash_script2)
+
+	except Exception as e:
+		print("Error: -", e)
 
 
 def getimage_version():
-    try:
-        image_version = about.getEnigmaVersionString()
-        return image_version.strip()
-    except:
-        return None
+	try:
+		image_version = about.getEnigmaVersionString()
+		return image_version.strip()
+	except:
+		return None
 
 
 def getversioninfo():
-    currversion = '1.0'
-    enigmaos = 'all'
-    lastbuild = '01012016'
-    version_file = resolveFilename(SCOPE_PLUGINS, 'Extensions/backupflashe/tools/version')
-    if os.path.exists(version_file):
-        try:
-            fp = open(version_file, 'r').readlines()
-            for line in fp:
-                if 'version' in line:
-                    currversion = line.split('=')[1].strip()
-                if 'enigmaos' in line:
-                    enigmaos = line.split('=')[1].strip()
-
-                if 'lastbuild' in line:
-                    lastbuild = line.split('=')[1].strip()
-        except:
-            pass
-    return (currversion, lastbuild, enigmaos)
+	currversion = '1.0'
+	version_file = resolveFilename(SCOPE_PLUGINS, 'Extensions/backupflashe/tools/version')
+	if os.path.exists(version_file):
+		try:
+			fp = open(version_file, 'r').readlines()
+			for line in fp:
+				if 'version' in line:
+					currversion = line.split('=')[1].strip()
+		except:
+			pass
+	return currversion
 
 
 def getboxtype():
-    boxtype = "dm7080hd"
-    if os.path.exists('/proc/stb/info/model'):
-        f = open('/proc/stb/info/model')
-        boxtype = f.read()
-        f.close()
-        boxtype = boxtype.replace('\n', '').replace('\\l', '')
-        if boxtype == "dm525":
-            boxtype = "dm520"
-        if boxtype == "one":
-            boxtype = "dreamone"
-        if boxtype == "two":
-            boxtype = "dreamtwo"
-    if boxtype.strip() == "":
-        boxtype = getHostName()
-    return boxtype
+	"""
+	Determines the type of box based on the content of '/proc/stb/info/model'.
+	Falls back to a default value or hostname if necessary.
+
+	Returns:
+		str: The box type.
+	"""
+	default_boxtype = "dm7080hd"
+	model_file = '/proc/stb/info/model'
+
+	try:
+		# Attempt to read the model from the file
+		if os.path.exists(model_file):
+			with open(model_file, 'r') as f:
+				boxtype = f.read().strip().replace('\\l', '')
+		else:
+			# Fallback to default if the file does not exist
+			boxtype = default_boxtype
+	except Exception as e:
+		# Handle unexpected errors during file access
+		print(f"Error reading model file: {e}")
+		boxtype = default_boxtype
+
+	# Map specific model names to their respective box types
+	model_map = {
+		"dm525": "dm520",
+		"one": "dreamone",
+		"two": "dreamtwo"
+	}
+	boxtype = model_map.get(boxtype, boxtype)
+
+	# Fallback to hostname if boxtype is empty
+	if not boxtype.strip():
+		boxtype = getHostName()
+
+	return boxtype
 
 
 def getHostName():
-    try:
-        boxtype = open("/etc/hostname").read()
-        return boxtype.strip()
-    except:
-        return ""
+	try:
+		boxtype = open("/etc/hostname").read()
+		return boxtype.strip()
+	except:
+		return ""
 
 
 def get_images(url, regx):
-    images = []
-    logdata("images_url", url)
-    try:
-        import ssl
-        req = compat_Request(url, headers={'User-Agent': 'Mozilla/5.0'})  # add [headers={'User-Agent': 'Mozilla/5.0'}] to fix HTTP Error 403: Forbidden
-        response = compat_urlopen(req, timeout=20, context=ssl._create_unverified_context())
-        data = response.read()
-        response.close()
-        match = re.findall(regx, data, re.M | re.I)
-        for item1, item2 in match:
-            images.append((item1, item2))
-        return images
-    except:
-        trace_error()
-        return []
+	images = []
+	logdata("images_url", url)
+	try:
+		req = compat_Request(url, headers={'User-Agent': 'Mozilla/5.0'})  # add [headers={'User-Agent': 'Mozilla/5.0'}] to fix HTTP Error 403: Forbidden
+		response = compat_urlopen(req, timeout=5)
+		data = response.read()
+		response.close()
+		match = re.findall(regx, data, re.M | re.I)
+		for item1, item2 in match:
+			images.append((item1, item2))
+		return images
+	except:
+		trace_error()
+		return []
+
+
+def get_images2(url, regx):
+	images = []
+	logdata("images_url", url)
+	try:
+		req = compat_Request(url, headers={'User-Agent': 'Mozilla/5.0'})  # add [headers={'User-Agent': 'Mozilla/5.0'}] to fix HTTP Error 403: Forbidden
+		response = compat_urlopen(req, timeout=5)
+		if PY3:
+			data = response.read().decode('utf-8')
+		else:
+			data = response.read()
+		response.close()
+		match = re.findall(str(regx), data, re.M | re.I)
+		for item1, item2 in match:
+			images.append((item1, item2))
+		return images
+	except:
+		trace_error()
+		return []
 
 
 def get_images_mediafire(url):
-    images = []
-    logdata("images_url", url)
+	"""
+	Extracts image download links from a MediaFire folder URL.
 
-    def readnet(url):
-        try:
-            import ssl
-            req = compat_Request(url, headers={'User-Agent': 'Mozilla/5.0'})  # add [headers={'User-Agent': 'Mozilla/5.0'}] to fix HTTP Error 403: Forbidden
-            response = compat_urlopen(req, timeout=30, context=ssl._create_unverified_context())
-            data = response.read()
-            return data
-        except:
-            trace_error()
-            return None
-    data = readnet(url)
-    if data is None:
-        return []
-    jdata = json.loads(data)
-    dl = jdata['response']['folder_content']['files']
-    images = []
-    for item in dl:
-        dl = item['links']['normal_download']
-        name = os.path.split(dl)[1]
-        data = readnet(dl)
-        regx = "href='(.*?)'"
-        hrefs = re.findall(regx, data, re.M | re.I)
-        print("hrefs", hrefs)
-        for href in hrefs:
-            if "download" not in href:
-                continue
-            name = os.path.split(href)[1]
-            images.append((name, href))
-            break
-    print(images)
-    return images
+	Args:
+		url (str): The MediaFire folder URL.
+
+	Returns:
+		list: A list of tuples containing the file name and the download URL.
+	"""
+	def fetch_url_content(url):
+		"""Fetch content from a given URL with error handling."""
+		try:
+			req = compat_Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+			with compat_urlopen(req, timeout=10) as response:
+				return response.read().decode('utf-8')
+		except Exception:
+			trace_error()
+			return None
+
+	# Log the provided URL
+	logdata("images_url", url)
+
+	# Fetch the initial JSON data from the URL
+	raw_data = fetch_url_content(url)
+	if not raw_data:
+		return []
+
+	try:
+		# Parse the JSON data
+		jdata = json.loads(raw_data)
+		files = jdata['response']['folder_content']['files']
+	except (KeyError, json.JSONDecodeError):
+		trace_error()
+		return []
+
+	# Extract image download links
+	images = []
+	for file_item in files:
+		try:
+			download_url = file_item['links']['normal_download']
+			file_content = fetch_url_content(download_url)
+			if not file_content:
+				continue
+
+			# Extract href links matching the pattern
+			hrefs = re.findall(r'href="(.*?)"', file_content, re.M | re.I)
+			for href in hrefs:
+				if "download" in href:
+					file_name = os.path.basename(href)
+					images.append((file_name, href))
+					break
+		except KeyError:
+			trace_error()
+			continue
+
+	print(images)
+	return images
 
 
-def trace_error():
-    try:
-        traceback.print_exc(file=sys.stdout)
-        if os.path.exists(logfile):
-            pass
-        else:
-            return
-        traceback.print_exc(file=open(logfile, 'a'))
-    except:
-        pass
+def trace_error(logfile="error.log"):
+	"""
+	Logs the traceback of the current exception to stdout and optionally to a log file.
+
+	Args:
+		logfile (str): Path to the log file. If the file does not exist, no logging occurs.
+	"""
+	try:
+		# Print the traceback to stdout
+		traceback.print_exc(file=sys.stdout)
+
+		# Check if the logfile exists and append the traceback
+		if os.path.exists(logfile):
+			with open(logfile, 'a') as log_file:
+				traceback.print_exc(file=log_file)
+	except Exception as e:
+		# Handle unexpected errors in logging
+		print(f"Failed to log error: {e}")
 
 
 def getimage_name():
-    GP3 = '%s/enigma2/python/Plugins/Bp/geminimain' % LIBPATH
-    GP4 = '%s/enigma2/python/Plugins/GP4/geminilocale/plugin.pyo' % LIBPATH
-    BLACKHOLE = '%s/enigma2/python/Blackhole' % LIBPATH
-    OPENBH = '%s/enigma2/python/Screens/BpBlue.pyo' % LIBPATH
-    MEDIASAT = '%s/enigma2/python/MediaSat' % LIBPATH
-    TSIMAGE = '%s/enigma2/python/Plugins/TSimage' % LIBPATH
-    VTI = '%s/enigma2/python/Plugins/SystemPlugins/VTIPanel' % LIBPATH
-    MERLIN = resolveFilename(SCOPE_PLUGINS, 'Extensions/AddOnManager')
-    DREAMELITE = '%s/enigma2/python/DE' % LIBPATH
-    Demoni = '%s/enigma2/python/Plugins/SystemPlugins/DemonisatManager' % LIBPATH
-    OPENDROID = '%s/enigma2/python/OPENDROID' % LIBPATH
-    EGAMI = '%s/enigma2/python/EGAMI' % LIBPATH
-    Satdreamgr = '%s/enigma2/python/Plugins/Satdreamgr' % LIBPATH
-    Powerboard = resolveFilename(SCOPE_PLUGINS, 'Extensions/PowerboardCenter')
-    PKT = resolveFilename(SCOPE_PLUGINS, 'Extensions/PKT')
-    OPENVIX = '%s/enigma2/python/Plugins/SystemPlugins/ViX' % LIBPATH
-    Domica = '%s/enigma2/python/Plugins/Domica' % LIBPATH
-    HDMU = resolveFilename(SCOPE_PLUGINS, 'Extensions/HDMUCenter')
-    OPENLD = resolveFilename(SCOPE_PLUGINS, 'Extensions/LDteam')
-    TDW = resolveFilename(SCOPE_PLUGINS, 'Extensions/TDW')
-    OPENHDF = resolveFilename(SCOPE_PLUGINS, 'Extensions/HDF-Toolbox')
-    OPENESI = resolveFilename(SCOPE_PLUGINS, 'Extensions/ExtraAddonss')
-    NonSoloSat = resolveFilename(SCOPE_PLUGINS, 'Extensions/NssPanel')
-    NEWNIGMA2 = '%s/enigma2/python/Plugins/newnigma2' % LIBPATH
-    name = 'Backup'
-    if os.path.exists(GP3):
-        name = 'Backup-GP3'
-    elif os.path.exists(GP4):
-        name = 'Backup-GP4'
-    elif os.path.exists(BLACKHOLE):
-        name = 'Backup-BlackHole'
-    elif os.path.exists(OPENBH):
-        name = 'Backup-OpenBH'
-    elif os.path.exists(MEDIASAT):
-        name = 'Backup-MediaSat'
-    elif os.path.exists(TSIMAGE):
-        name = 'Backup-TSimage'
-    elif os.path.exists(VTI):
-        name = 'Backup-VTI'
-    elif os.path.exists(MERLIN):
-        name = 'Backup-Merlin4'
-    elif os.path.exists(DREAMELITE):
-        name = 'Backup-DreamEiIte'
-    elif os.path.exists(Demoni):
-        name = 'Backup-Demonisat'
-    elif os.path.exists(OPENDROID):
-        name = 'Backup-OpenDroid'
-    elif os.path.exists(EGAMI):
-        name = 'Backup-EGAMI'
-    elif os.path.exists(Satdreamgr):
-        name = 'Backup-Satdreamgr'
-    elif os.path.exists(Powerboard):
-        name = 'Backup-Powerboard'
-    elif os.path.exists(PKT):
-        name = 'Backup-PKT'
-    elif os.path.exists(OPENVIX):
-        name = 'Backup-OpenVix'
-    elif os.path.exists(Domica):
-        name = 'Backup-Domica'
-    elif os.path.exists(HDMU):
-        name = 'Backup-HDMU'
-    elif os.path.exists(OPENLD):
-        name = 'Backup-OpenLD'
-    elif os.path.exists(TDW):
-        name = 'Backup-TDW'
-    elif os.path.exists(OPENHDF):
-        name = 'Backup-OpenHDF'
-    elif os.path.exists(OPENESI):
-        name = 'Backup-OpenESI'
-    elif os.path.exists(NonSoloSat):
-        name = 'Backup-NonSoloSat'
-    elif os.path.exists(NEWNIGMA2):
-        name = 'Backup-newnigma2'
-    else:
-        name = None
-        if os.path.exists("/etc/image-version"):
-            f = open("/etc/image-version")
-            line = f.readline()
-            while (line):
-                line = f.readline()
-                if line.startswith("creator="):
-                    name = line
-            f.close()
-            if name:
-                name = name.replace("creator=", "")
-                sp = []
-                if len(name) > 0:
-                    sp = name.split(" ")
-                    if len(sp) > 0:
-                        name = sp[0]
-                        name = name.replace("\n", "")
-                        name = "Backup-" + name
-        if name is None and os.path.exists("/etc/issue.net"):
-            f = open("/etc/issue.net")
-            i = f.read()
-            f.close()
-            if "power-Sat" in i.lower():
-                name = "Backup-PowerSat"
-            if "oooZooN" in i.lower():
-                name = "Backup-OoZooN"
-            if "peter" in i.lower():
-                name = "Backup-PeterPan"
-            if "italysat" in i.lower():
-                name = "Backup-ItalySat"
-            if "openatv" in i.lower():
-                name = "Backup-openATV"
-            if "rudreamat" in i.lower():
-                name = "Backup-ruDREAM"
-            if "openeight" in i.lower():
-                name = "Backup-OpenEight"
-            if "oenplus" in i.lower():
-                name = "Backup-OpenPlus"
-            if "openpli" in i.lower():
-                name = "Backup-OpenPLI"
-            if "opendreambox" in i.lower():
-                name = "Backup-Opendreambox"
-        if name is None:
-            name = "Backup-dreambox"
+	# Definizione dei percorsi
+	paths = [
+		('Backup-GP3', '%s/enigma2/python/Plugins/Bp/geminimain'),
+		('Backup-GP4', '%s/enigma2/python/Plugins/GP4/geminilocale/plugin.pyo'),
+		('Backup-BlackHole', '%s/enigma2/python/Blackhole'),
+		('Backup-OpenBH', '%s/enigma2/python/Screens/BpBlue.pyo'),
+		('Backup-MediaSat', '%s/enigma2/python/MediaSat'),
+		('Backup-TSimage', '%s/enigma2/python/Plugins/TSimage'),
+		('Backup-VTI', '%s/enigma2/python/Plugins/SystemPlugins/VTIPanel'),
+		('Backup-DreamElite', '%s/enigma2/python/DE'),
+		('Backup-Demonisat', '%s/enigma2/python/Plugins/SystemPlugins/DemonisatManager'),
+		('Backup-OpenDroid', '%s/enigma2/python/OPENDROID'),
+		('Backup-EGAMI', '%s/enigma2/python/EGAMI'),
+		('Backup-Satdreamgr', '%s/enigma2/python/Plugins/Satdreamgr'),
+		('Backup-newnigma2', '%s/enigma2/python/Plugins/newnigma2')
+	]
+	name = None
 
-    image_version = getimage_version()
-    if image_version is not None and not image_version == "":
-        name = name + "-" + image_version
-    return (name)
+	# Verifica dei percorsi
+	for backup_name, path in paths:
+		if os.path.exists(path % LIBPATH):
+			name = backup_name
+			break
 
-    image_version = getimage_version()
-    if image_version is not None and not image_version == "":
-        name = name + "-" + image_version
-    if name is None:
-        name = "Backup-"
-    return (name)
+	# Lettura di /etc/image-version
+	if name is None and os.path.exists("/etc/image-version"):
+		try:
+			with open("/etc/image-version") as f:
+				for line in f:
+					if line.startswith("creator="):
+						name = "Backup-" + line.replace("creator=", "").strip().split(" ")[0]
+						break
+		except IOError:
+			pass
+
+	# Lettura di /etc/issue.net
+	if name is None and os.path.exists("/etc/issue.net"):
+		try:
+			with open("/etc/issue.net") as f:
+				content = f.read().lower()
+				if "power-sat" in content:
+					name = "Backup-PowerSat"
+				elif "ooozooon" in content:
+					name = "Backup-OoZooN"
+				elif "peter" in content:
+					name = "Backup-PeterPan"
+				elif "italysat" in content:
+					name = "Backup-ItalySat"
+				elif "openatv" in content:
+					name = "Backup-openATV"
+				elif "rudream" in content:
+					name = "Backup-ruDREAM"
+				elif "openeight" in content:
+					name = "Backup-OpenEight"
+				elif "openplus" in content:
+					name = "Backup-OpenPlus"
+				elif "openpli" in content:
+					name = "Backup-OpenPLI"
+				elif "opendreambox" in content:
+					name = "Backup-Opendreambox"
+		except IOError:
+			pass
+
+	# Valore di default
+	if name is None:
+		name = "Backup-dreambox"
+
+	# Aggiunta della data
+	now = datetime.datetime.now()
+	name += "-" + now.strftime('%Y-%m-%d')
+
+	return name
 
 
 def getmDevices():
-    myusb = myusb1 = myhdd = myhdd2 = mysdcard = mysd = myuniverse = myba = ''
-    mdevices = []
-    myusb = None
-    myusb1 = None
-    myhdd = None
-    myhdd2 = None
-    mysdcard = None
-    mysd = None
-    myuniverse = None
-    myba = None
-    if fileExists('/proc/mounts'):
-        f = open('/proc/mounts', 'r')
-        for line in f.readlines():
-            if line.find('/media/usb') != -1:
-                myusb = '/media/usb/backup'
-                if not os.path.exists('/media/usb/backup'):
-                    os.system('mkdir -p /media/usb/backup')
-            elif line.find('/media/usb1') != -1:
-                myusb1 = '/media/usb1/backup'
-                if not os.path.exists('/media/usb1/backup'):
-                    os.system('mkdir -p /media/usb1/backup')
-            elif line.find('/media/hdd') != -1:
-                myhdd = '/media/hdd/backup'
-                if not os.path.exists('/media/hdd/backup'):
-                    os.system('mkdir -p /media/hdd/backup')
-            elif line.find('/media/hdd2') != -1:
-                myhdd2 = '/media/hdd2/backup'
-                if not os.path.exists('/media/hdd2/backup'):
-                    os.system('mkdir -p /media/hdd2/backup')
-            elif line.find('/media/sdcard') != -1:
-                mysdcard = '/media/sdcard/backup'
-                if not os.path.exists('/media/sdcard/backup'):
-                    os.system('mkdir -p /media/sdcard/backup')
-            elif line.find('/media/sd') != -1:
-                mysd = '/media/sd/backup'
-                if not os.path.exists('/media/sd/backup'):
-                    os.system('mkdir -p /media/sd/backup')
-            elif line.find('/universe') != -1:
-                myuniverse = '/universe/backup'
-                if not os.path.exists('/universe/backup'):
-                    os.system('mkdir -p /universe/backup')
-            elif line.find('/media/ba') != -1:
-                myba = '/media/ba/backup'
-                if not os.path.exists('/media/ba/backup'):
-                    os.system('mkdir -p /media/ba/backup')
-        f.close()
-    if myusb:
-        mdevices.append((myusb, myusb))
-    if myusb1:
-        mdevices.append((myusb1, myusb1))
-    if myhdd:
-        mdevices.append((myhdd, myhdd))
-    if myhdd2:
-        mdevices.append((myhdd2, myhdd2))
-    if mysdcard:
-        mdevices.append((mysdcard, mysdcard))
-    if mysd:
-        mdevices.append((mysd, mysd))
-    if myuniverse:
-        mdevices.append((myuniverse, myuniverse))
-    if myba:
-        mdevices.append((myba, myba))
-    return mdevices
+	backup_paths = [
+		'/media/usb', '/media/usb1', '/media/hdd', '/media/hdd2',
+		'/media/sdcard', '/media/sd', '/universe', '/media/ba', '/data'
+	]
+	mdevices = []
+
+	if os.path.exists('/proc/mounts'):
+		with open('/proc/mounts', 'r') as f:
+			mounts = f.readlines()
+
+		for path in backup_paths:
+			if any(line.find(path) != -1 for line in mounts):
+				backup_dir = path + "/backup"
+				os.makedirs(backup_dir, exist_ok=True)
+				mdevices.append((backup_dir, backup_dir))
+
+	return mdevices

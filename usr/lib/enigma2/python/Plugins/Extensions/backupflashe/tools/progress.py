@@ -1,31 +1,27 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 # RAED & mfaraj57 &  (c) 2018
 # Code RAED & mfaraj57
 
 # python3
 from __future__ import print_function
-from Components.ActionMap import ActionMap
-from Components.Pixmap import Pixmap
-from Components.ProgressBar import ProgressBar
-from Components.ScrollLabel import ScrollLabel
-from Components.Slider import Slider
-from Screens.MessageBox import MessageBox
-from Screens.Screen import Screen
-from Screens.Standby import TryQuitMainloop
-from Tools.Directories import (resolveFilename, SCOPE_PLUGINS)
-from enigma import eConsoleAppContainer, eTimer
-from enigma import getDesktop
-import os
-from .bftools import getversioninfo
-from .skin import *
-from .bftools import (copylog, getboxtype, trace_error)
 
-Ver, lastbuild, enigmaos = getversioninfo()
+from enigma import eConsoleAppContainer, eTimer
+from Screens.Screen import Screen
+from Components.ActionMap import ActionMap
+from Components.ScrollLabel import ScrollLabel
+from Screens.MessageBox import MessageBox
+from Components.ProgressBar import ProgressBar
+from Components.Slider import Slider
+from Screens.Standby import TryQuitMainloop
+from Tools.Directories import resolveFilename, SCOPE_PLUGINS
+import os
+from .skin import *
+from .bftools import copylog, getboxtype, getimage_name, trace_error
+
 backup_progress = 0
 flash_progress = 0
-sz_w = getDesktop(0).size().width()
+imagename = getimage_name()
 
 
 def rootspace():
@@ -43,7 +39,6 @@ def rootspace():
 
 
 class ProgressScreen(Screen):
-
     def __init__(self, session, title='Console', cmdlist=None, finishedCallback=None, closeOnSuccess=False, endstr='', imagePath=''):
         Screen.__init__(self, session)
         self.skin = SKIN_Progress
@@ -68,10 +63,10 @@ class ProgressScreen(Screen):
         self['slider'] = self.slider
         self.shown = True
         self['actions'] = ActionMap(['WizardActions', 'DirectionActions', 'ColorActions'], {'ok': self.hideshow,
-         'back': self.cancel,
-         'blue': self.restartenigma,
-         'up': self['text'].pageUp,
-         'down': self['text'].pageDown}, -1)
+                                     'back': self.cancel,
+                                     'blue': self.restartenigma,
+                                     'up': self['text'].pageUp,
+                                     'down': self['text'].pageDown}, -1)
         self.cmdlist = cmdlist
         self.newtitle = title
         self.onShown.append(self.updateTitle)
@@ -151,7 +146,7 @@ class ProgressScreen(Screen):
             elif boxtype == 'dm900' or boxtype == 'dm920':
                 gfactor = 3
                 xfactor = 4.5
-            else:  # dm820, dm7080
+            else:  # dm820,dm7080
                 gfactor = 3.3
                 xfactor = 5
             if self.root_size < 1:
@@ -159,9 +154,9 @@ class ProgressScreen(Screen):
                 backup_progress = 3
             if self.image_size > 0:
                 if self.imagePath.endswith(".gz"):
-                    backup_progress = int(100 * gfactor * self.image_size / (root_size))
+                    backup_progress = int(550 * gfactor * self.image_size / (root_size))
                 else:
-                    backup_progress = int(100 * xfactor * self.image_size / (root_size))
+                    backup_progress = int(500 * xfactor * self.image_size / (root_size))
                 self.setTitle('Backup ' + str(int(float(self.image_size / 1067008))) + " MB")
                 self.slider.setValue(backup_progress)
             self.TimerBackup.start(2000, True)
@@ -190,7 +185,7 @@ class ProgressScreen(Screen):
             else:
                 self.TimerBackup.callback.append(self.checkbackupProgress)
             self.TimerBackup.start(10000, True)
-            startstr = 'Backup started'
+            startstr = 'Backup started for (%s)' % imagename.replace("Backup-", "")
         else:
             self.flashingtime = 0
             self.TimerFlashing = eTimer()
@@ -223,7 +218,7 @@ class ProgressScreen(Screen):
                 self['text'].setText(str)
             else:
                 str += _('Backup finished!!\nPress exit Button')
-                print('[backupflash] found finished process ...')
+                # print('[backupflash] found finished process ...')
             if os.path.exists('/tmp/bbackup.scr'):
                 os.remove('/tmp/bbackup.scr')
             if retval:
@@ -248,6 +243,7 @@ class ProgressScreen(Screen):
                 self.finishedCallback(retval)
             if not retval and self.closeOnSuccess:
                 self.cancel()
+            self.cancel()
         return
 
     def hideshow(self):
@@ -272,6 +268,7 @@ class ProgressScreen(Screen):
         return
 
     def abort(self, answer=False):
+        os.system("touch /tmp/.cancelBackup")
         PLUGINROOT = resolveFilename(SCOPE_PLUGINS, 'Extensions/backupflashe')
         PLUGINBACKUP = resolveFilename(SCOPE_PLUGINS, 'Extensions/dBackup')
         if answer:
@@ -281,8 +278,8 @@ class ProgressScreen(Screen):
             self.container.sendEOF()
             if os.path.exists(PLUGINBACKUP):
                 os.system('mv %s %s' % (PLUGINBACKUP, PLUGINROOT))
-            # if os.path.exists(self.imagePath):  # these lines delete image from path of image (not recommanded)
-                # os.remove(self.imagePath)
+            # if os.path.exists(self.imagePath): #these lines delete image from path of image (not recommanded)
+            #    os.remove(self.imagePath)
             if os.path.exists(tarimage):
                 os.remove(tarimage)
             try:
