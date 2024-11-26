@@ -3,11 +3,11 @@
 # Update 17-11-2018 Add download images option
 
 from enigma import getDesktop
-from Screens.Screen import Screen
-from Components.Pixmap import Pixmap
-from .bftools import getversioninfo
-import os
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
+import os
+
+from .bftools import getversioninfo
+
 
 Ver, lastbuild, enigmaos = getversioninfo()
 

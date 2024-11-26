@@ -218,7 +218,6 @@ class ProgressScreen(Screen):
                 self['text'].setText(str)
             else:
                 str += _('Backup finished!!\nPress exit Button')
-                # print('[backupflash] found finished process ...')
             if os.path.exists('/tmp/bbackup.scr'):
                 os.remove('/tmp/bbackup.scr')
             if retval:
@@ -278,8 +277,6 @@ class ProgressScreen(Screen):
             self.container.sendEOF()
             if os.path.exists(PLUGINBACKUP):
                 os.system('mv %s %s' % (PLUGINBACKUP, PLUGINROOT))
-            # if os.path.exists(self.imagePath): #these lines delete image from path of image (not recommanded)
-            #    os.remove(self.imagePath)
             if os.path.exists(tarimage):
                 os.remove(tarimage)
             try:
@@ -292,7 +289,6 @@ class ProgressScreen(Screen):
 
     def dataAvail(self, str):
         self['text'].setText(self['text'].getText())  # PY3
-        # self['text'].setText(self['text'].getText() + str)
 
     def processAnswer(self, retval):
         if retval:

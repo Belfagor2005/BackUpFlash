@@ -3,21 +3,20 @@
 # RAED & mfaraj57 &  (c) 2018
 # Code RAED & mfaraj57
 
-# python3
-from .compat import PY3
-
 from enigma import eTimer
 from Components.ActionMap import ActionMap
 from Components.Label import Label
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Components.MenuList import MenuList
+from Components.config import config
 from Screens.ChoiceBox import ChoiceBox
 import requests
 import re
 import os
-from Components.config import config
 
+# python3
+from .compat import PY3
 from .skin import *
 from .Console import Console
 from .download import imagedownloadScreen
@@ -739,18 +738,6 @@ class imagesScreen(Screen):
             pass
 
     def doFlash(self):
-        # k = open("/proc/cmdline","r")
-        # cmd =k.read()
-        # k.close()
-        # boxtype = getboxtype()
-        # if boxtype == "dm520":
-            # if cmd.find("root=/dev/sda1") != -1:
-                # rootfs = "root=/dev/sda1"
-            # else:
-                # rootfs = "root=ubi0:dreambox-rootfs"
-        # else:
-            # rootfs = "root=/dev/mmcblk0"
-
         # Read the /proc/cmdline content
         with open("/proc/cmdline", "r") as file:
             cmd = file.read().strip()
@@ -766,14 +753,8 @@ class imagesScreen(Screen):
             rootfs = "root=/dev/mmcblk0"
         if not config.backupflashe.flashAllow.value and (os.path.exists("/.bainfo") or os.path.exists("/.lfinfo") or cmd.find(rootfs) == -1):
             self.session.open(MessageBox, "You Disable To flash new image from External image.\nSo Flashing works only in Flash image", MessageBox.TYPE_ERROR)
-        # if os.path.exists("/.bainfo"):
-                # self.session.open(MessageBox, "Sorry, Flashing works only in Flash image", MessageBox.TYPE_ERROR)
-        # elif os.path.exists("/.lfinfo"):
-        #        self.session.open(MessageBox, "Sorry, Flashing works only in Flash image", MessageBox.TYPE_ERROR)
-        # elif cmd.find(rootfs) == -1:
-        #        self.session.open(MessageBox, "Sorry, Flashing works only in Flash image", MessageBox.TYPE_ERROR)
         else:
-            from Plugins.Extensions.backupflashe.tools.flash import flashScript
+            from .tools.flash import flashScript
             if self.imageok is False:
                 return
             mytitle = _('Do Flash Images')

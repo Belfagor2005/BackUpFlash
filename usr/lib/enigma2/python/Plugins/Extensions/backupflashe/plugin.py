@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 # RAED & mfaraj57 (c) 2018
 # Code RAED & mfaraj57
 from Components.ActionMap import ActionMap
@@ -17,7 +18,7 @@ from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Tools.Directories import resolveFilename, fileExists, SCOPE_MEDIA
 import datetime
 import os
-from .tools.skin import *
+from .tools.skin import SKIN_full_main
 from .tools.Console import Console
 from .tools.bftools import (logdata, dellog, getboxtype, getmDevices, trace_error, getversioninfo, getimage_name)
 from .tools.compat import PY3
@@ -155,16 +156,6 @@ class full_main(Screen, ConfigListScreen):
             self.timer.callback.append(self.updateList)
         except:
             self.timer_conn = self.timer.timeout.connect(self.updateList)
-        # if config.backupflashe.cleanba.value:
-        #     if fileExists(BAINIT):
-        #          if fileExists(BRANDOS):
-        #               os.system('rm -f /sbin/init')
-        #               os.system('ln -s /etc/alternatives/init /sbin/init')
-        #               os.system('rm -f /etc/alternatives/init')
-        #               os.system('ln -s /lib/systemd/systemd /etc/alternatives/init')
-        #          else:
-        #               os.system('rm -f /sbin/init')
-        #               os.system('ln -s init.sysvinit /sbin/init')
         self.timer.start(6, 1)
         self.onLayoutFinish.append(self.layoutFinished)
 
@@ -203,8 +194,6 @@ class full_main(Screen, ConfigListScreen):
         else:
             pass
         self.list.append(getConfigListEntry(('Enable shutdown box after backup'), config.backupflashe.shutdown, _("This option to Enable or Disable Shutdown Box After Finished Backup")))
-        # if (os.path.exists("/.bainfo") or os.path.exists("/.lfinfo") or cmd.find(rootfs) == -1):
-        #    self.list.append(getConfigListEntry(('Allow to flash image from External image'), config.backupflashe.flashAllow, _("Warning: the process will delete the image if you are on an external flash\n(it is not recommended to Enable it)\nSafy way to Flash new image Please go to internal flash")))
         self.list.append(getConfigListEntry(('Clean image from BA symlink before backup'), config.backupflashe.cleanba, _("This option for remove BarryAllen symlink from image Before Start Backup")))
         self['config'].list = self.list
         self['config'].l.setList(self.list)
@@ -312,7 +301,7 @@ class full_main(Screen, ConfigListScreen):
 
     def flashOnline(self,):
         configfile.save()
-        from Plugins.Extensions.backupflashe.tools.flashonline import teamsScreen
+        from .tools.flashonline import teamsScreen
         device_path = self['config'].list[0][1].getText()
         # logdata('selected device path', device_path)
         self.session.open(teamsScreen, device_path)

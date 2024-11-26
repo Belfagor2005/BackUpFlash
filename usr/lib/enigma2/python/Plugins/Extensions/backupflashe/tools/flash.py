@@ -67,7 +67,6 @@ def flashScript(IMAGENAME, device_path):
         command += 'xz -d -c \"%s/tmp/%s\" > \"%s\"\n' % (device_path, flashimagename.replace('.zip', '.rootfs.tar.xz'), tarimage)
         command += "fi\n"
     command += 'set +e\n'
-    # command += 'mv %s %s\n' % (PLUGINROOT, PLUGINBACKUP)
     command += swaproot(device_path, tarimage) + '\n'
     command += 'exit 0\n'
     logdata('command', command)
@@ -95,8 +94,7 @@ def swaproot(device_path, tarimage):
         os.system('cp -r %s/mipsel %s' % (PLUGINROOT, PLUGINBACKUP))
         DBSWAPROOT = '/usr/lib/enigma2/python/Plugins/Extensions/dBackup/mipsel'
         JOBSWAPROOT = "/sbin/start-stop-daemon -S -b -n swaproot -x %s/mipsel/swaproot %s" % (PLUGINBACKUP, tarimage)
-    # command = 'mkdir -p %s\n' % DBSWAPROOT
-    # command += 'cp %s %s\n' % (SWAPROOT, DBSWAPROOT)
+
     command = 'chmod 0755 %s\n' % (DBSWAPROOT + '/swaproot')
     command += '%s \n' % JOBSWAPROOT
     return command
@@ -143,7 +141,6 @@ class doFlash(Screen):
             SWAPROOT = '/usr/lib/enigma2/python/Plugins/Extensions/backupflashe/mipsel/swaproot'
             SWAPROOTDIR = '/usr/lib/enigma2/python/Plugins/Extensions/backupflashe/mipsel'
         if not fileExists(SWAPROOT):
-            # self.session.open(MessageBox, _('swaproot Not found it.\nPlease send it to %s' % SWAPROOTDIR), MessageBox.TYPE_INFO)
             self.session.open(MessageBox, _('swaproot Not found it.\nPlease install plugin again'), MessageBox.TYPE_INFO)
             self.close()
         if len(self.images) > 0:

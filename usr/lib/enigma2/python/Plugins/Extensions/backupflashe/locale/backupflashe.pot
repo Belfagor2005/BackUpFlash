@@ -1,0 +1,361 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: backupflashe\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Pedro_Newbie <pedro.newbie@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 3.5\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: plugin.py\n"
+"X-Poedit-SearchPath-1: tools/backup.py\n"
+"X-Poedit-SearchPath-2: tools/bftools.py\n"
+"X-Poedit-SearchPath-3: tools/compat.py\n"
+"X-Poedit-SearchPath-4: tools/Console.py\n"
+"X-Poedit-SearchPath-5: tools/download.py\n"
+"X-Poedit-SearchPath-6: tools/flash.py\n"
+"X-Poedit-SearchPath-7: tools/flashonline.py\n"
+"X-Poedit-SearchPath-8: tools/progress.py\n"
+"X-Poedit-SearchPath-9: tools/skin.py\n"
+
+#: plugin.py:100
+msgid "Images from BarryAllen"
+msgstr ""
+
+#: plugin.py:104 plugin.py:108
+msgid "Images from AlanTuring"
+msgstr ""
+
+#: plugin.py:118
+#, python-format
+msgid "Images from %s"
+msgstr ""
+
+#: plugin.py:134
+msgid "Flash Image"
+msgstr ""
+
+#: plugin.py:135
+msgid "Flash online"
+msgstr ""
+
+#: plugin.py:136
+msgid "Backup Image"
+msgstr ""
+
+#: plugin.py:137
+msgid "Recovery Mode"
+msgstr ""
+
+#: plugin.py:173
+msgid "Do Flash New Image or Full Backup Image."
+msgstr ""
+
+#: plugin.py:180
+msgid ""
+"Sorry no device mounted found.\n"
+"Please check your media in devices manager."
+msgstr ""
+
+#: plugin.py:188
+msgid "This option to set the path of Backup/Flash directory"
+msgstr ""
+
+#: plugin.py:189
+msgid "This option to select the type of compress option"
+msgstr ""
+
+#: plugin.py:191 plugin.py:193
+msgid "Compression"
+msgstr ""
+
+#: plugin.py:191 plugin.py:193
+msgid "(1-6)"
+msgstr ""
+
+#: plugin.py:191 plugin.py:193
+msgid "This option to set stringe value of Compress image (The higher the value, the longer the operation time, but the smaller the backup size)"
+msgstr ""
+
+#: plugin.py:196
+msgid "This option to Enable or Disable Shutdown Box After Finished Backup"
+msgstr ""
+
+#: plugin.py:197
+msgid "This option for remove BarryAllen symlink from image Before Start Backup"
+msgstr ""
+
+#: plugin.py:218
+msgid "Select Backup Option"
+msgstr ""
+
+#: plugin.py:223
+#, python-format
+msgid "%s"
+msgstr ""
+
+#: plugin.py:232 plugin.py:271
+msgid "Please Enter Name For Backup Image"
+msgstr ""
+
+#: plugin.py:291
+msgid "Really shutdown now (To Go to Recovery Mode) ?!!"
+msgstr ""
+
+#: plugin.py:323
+msgid "select task"
+msgstr ""
+
+#: plugin.py:370
+#, python-format
+msgid ""
+"New version %s is available.\n"
+"\n"
+"%s.\n"
+"\n"
+"Do want ot install now."
+msgstr ""
+
+#: plugin.py:396
+msgid "BackupFlash"
+msgstr ""
+
+#: plugin.py:397
+msgid "Backup And Flash Images"
+msgstr ""
+
+#: tools/Console.py:60 tools/backup.py:32 tools/backup.py:141
+#: tools/flash.py:108 tools/flashonline.py:36 tools/flashonline.py:148
+msgid "Cancel"
+msgstr ""
+
+#: tools/Console.py:61
+msgid "Hide"
+msgstr ""
+
+#: tools/Console.py:73
+msgid "Console"
+msgstr ""
+
+#: tools/Console.py:92
+msgid "Execution progress:"
+msgstr ""
+
+#: tools/Console.py:115
+msgid "Execution finished!!"
+msgstr ""
+
+#: tools/Console.py:121
+msgid ""
+"\n"
+"Press OK or Exit to abort!"
+msgstr ""
+
+#: tools/Console.py:122
+msgid "Exit"
+msgstr ""
+
+#: tools/Console.py:137
+msgid "Cancel execution?"
+msgstr ""
+
+#: tools/backup.py:33 tools/backup.py:142
+msgid "Backup"
+msgstr ""
+
+#: tools/backup.py:88 tools/backup.py:196
+msgid "Backup image"
+msgstr ""
+
+#: tools/backup.py:107 tools/backup.py:213
+msgid ""
+"Sorry no device found to store backup.\n"
+"Please check your media in devices manager."
+msgstr ""
+
+#: tools/backup.py:127 tools/backup.py:233
+#, python-format
+msgid ""
+"(%s)\n"
+"on\n"
+"[%s]\n"
+"\n"
+"finished. Press (Exit) or (Ok) Button."
+msgstr ""
+
+#: tools/download.py:47
+msgid "Waiting to get resouces free..."
+msgstr ""
+
+#: tools/download.py:50 tools/download.py:160 tools/download.py:161
+msgid "Connecting"
+msgstr ""
+
+#: tools/download.py:73 tools/download.py:76
+msgid "Downloading"
+msgstr ""
+
+#: tools/download.py:84
+msgid "Download completed successfully."
+msgstr ""
+
+#: tools/download.py:101
+msgid "Download failed Press Exit"
+msgstr ""
+
+#: tools/download.py:120
+msgid "Are you sure to stop download."
+msgstr ""
+
+#: tools/download.py:140
+msgid "Aborting..."
+msgstr ""
+
+#: tools/flash.py:109
+msgid "Flash"
+msgstr ""
+
+#: tools/flash.py:144
+msgid ""
+"swaproot Not found it.\n"
+"Please install plugin again"
+msgstr ""
+
+#: tools/flash.py:150
+msgid "Select image and do flash."
+msgstr ""
+
+#: tools/flash.py:152
+#, python-format
+msgid ""
+"Sorry no images found to flash.\n"
+"Please put image  in %s."
+msgstr ""
+
+#: tools/flash.py:170
+msgid "Are you sure to Flash image."
+msgstr ""
+
+#: tools/flash.py:180
+msgid "Flash image"
+msgstr ""
+
+#: tools/flash.py:185
+msgid "seem the image is corrupted,please select another image."
+msgstr ""
+
+#: tools/flashonline.py:37
+msgid "Select"
+msgstr ""
+
+#: tools/flashonline.py:66
+msgid "select image type"
+msgstr ""
+
+#: tools/flashonline.py:87
+msgid "Dreamboxupdates-Stable"
+msgstr ""
+
+#: tools/flashonline.py:88
+msgid "Dreamboxupdates-UnStable"
+msgstr ""
+
+#: tools/flashonline.py:89
+msgid "Gemini4"
+msgstr ""
+
+#: tools/flashonline.py:90
+msgid "DreamElite"
+msgstr ""
+
+#: tools/flashonline.py:91
+msgid "Merlin4"
+msgstr ""
+
+#: tools/flashonline.py:93
+msgid "Newnigma2"
+msgstr ""
+
+#: tools/flashonline.py:96
+msgid "Satlodge"
+msgstr ""
+
+#: tools/flashonline.py:103
+msgid "________________ Python3 Images ________________"
+msgstr ""
+
+#: tools/flashonline.py:104
+msgid "BlackHole"
+msgstr ""
+
+#: tools/flashonline.py:105
+msgid "OpenTSimage"
+msgstr ""
+
+#: tools/flashonline.py:106
+msgid "OpenPLI-Unoffical"
+msgstr ""
+
+#: tools/flashonline.py:107 tools/flashonline.py:114
+msgid "OpenATV"
+msgstr ""
+
+#: tools/flashonline.py:108
+msgid "OpenVIX"
+msgstr ""
+
+#: tools/flashonline.py:109
+msgid "PurE2"
+msgstr ""
+
+#: tools/flashonline.py:110
+msgid "OpenVision"
+msgstr ""
+
+#: tools/flashonline.py:111
+msgid "TeamBlue"
+msgstr ""
+
+#: tools/flashonline.py:113
+msgid "________________ Python2 Images ________________"
+msgstr ""
+
+#: tools/flashonline.py:115
+msgid "AFF-TitanNit"
+msgstr ""
+
+#: tools/flashonline.py:116
+msgid "OpenSatlodge"
+msgstr ""
+
+#: tools/flashonline.py:117
+msgid "OpenHDF"
+msgstr ""
+
+#: tools/flashonline.py:118
+msgid "NonSoloSat"
+msgstr ""
+
+#: tools/flashonline.py:149
+msgid "Download"
+msgstr ""
+
+#: tools/flashonline.py:760
+msgid "Do Flash Images"
+msgstr ""
+
+#: tools/progress.py:220
+msgid ""
+"Backup finished!!\n"
+"Press exit Button"
+msgstr ""
+
+#: tools/progress.py:266
+#, python-format
+msgid "Are you sure to cancel %s"
+msgstr ""
