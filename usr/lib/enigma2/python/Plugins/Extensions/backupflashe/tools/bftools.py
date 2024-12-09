@@ -107,7 +107,7 @@ def getboxtype():
 			boxtype = default_boxtype
 	except Exception as e:
 		# Handle unexpected errors during file access
-		print(f"Error reading model file: {e}")
+		print("Error reading model file:", e)
 		boxtype = default_boxtype
 
 	# Map specific model names to their respective box types
@@ -247,7 +247,7 @@ def trace_error(logfile="error.log"):
 				traceback.print_exc(file=log_file)
 	except Exception as e:
 		# Handle unexpected errors in logging
-		print(f"Failed to log error: {e}")
+		print("Failed to log error:", e)
 
 
 def getimage_name():
@@ -325,21 +325,27 @@ def getimage_name():
 	return name
 
 
+import os
+
 def getmDevices():
 	backup_paths = [
 		'/media/usb', '/media/usb1', '/media/hdd', '/media/hdd2',
 		'/media/sdcard', '/media/sd', '/universe', '/media/ba', '/data'
 	]
 	mdevices = []
-
 	if os.path.exists('/proc/mounts'):
 		with open('/proc/mounts', 'r') as f:
 			mounts = f.readlines()
-
 		for path in backup_paths:
 			if any(line.find(path) != -1 for line in mounts):
-				backup_dir = path + "/backup"
-				os.makedirs(backup_dir, exist_ok=True)
+				backup_dir = os.path.join(path, "backup")
+				if not os.path.exists(backup_dir):
+					try:
+						os.makedirs(backup_dir)
+					except Exception as e:
+						print("Errore nella creazione della directory %s: %s" % (backup_dir, e))
+						continue
 				mdevices.append((backup_dir, backup_dir))
 
 	return mdevices
+
