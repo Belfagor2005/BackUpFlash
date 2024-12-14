@@ -260,12 +260,23 @@ def getimage_name():
 		('Backup-MediaSat', '%s/enigma2/python/MediaSat'),
 		('Backup-TSimage', '%s/enigma2/python/Plugins/TSimage'),
 		('Backup-VTI', '%s/enigma2/python/Plugins/SystemPlugins/VTIPanel'),
+		('Backup-Merlin4', '%s/enigma2/python/Plugins/Extensions/AddOnManager'),
 		('Backup-DreamElite', '%s/enigma2/python/DE'),
 		('Backup-Demonisat', '%s/enigma2/python/Plugins/SystemPlugins/DemonisatManager'),
 		('Backup-OpenDroid', '%s/enigma2/python/OPENDROID'),
 		('Backup-EGAMI', '%s/enigma2/python/EGAMI'),
 		('Backup-Satdreamgr', '%s/enigma2/python/Plugins/Satdreamgr'),
-		('Backup-newnigma2', '%s/enigma2/python/Plugins/newnigma2')
+		('Backup-Powerboard', '%s/enigma2/python/Plugins/Extensions/PowerboardCenter'),
+		('Backup-PKT', '%s/enigma2/python/Plugins/Extensions/PKT'),
+		('Backup-OpenVix', '%s/enigma2/python/Plugins/SystemPlugins/ViX'),
+		('Backup-Domica', '%s/enigma2/python/Plugins/Domica'),
+		('Backup-HDMU', '%s/enigma2/python/Plugins/Extensions/HDMUCenter'),
+		('Backup-OpenLD', '%s/enigma2/python/Plugins/Extensions/LDteam'),
+		('Backup-TDW', '%s/enigma2/python/Plugins/Extensions/TDW'),
+		('Backup-OpenHDF', '%s/enigma2/python/Plugins/Extensions/HDF-Toolbox'),
+		('Backup-OpenESI', '%s/enigma2/python/Plugins/Extensions/ExtraAddonss'),
+		('Backup-NonSoloSat', '%s/enigma2/python/Plugins/Extensions/NssPanel'),
+		('Backup-newnigma2', '%s/enigma2/python/Plugins/newnigma2'),
 	]
 	name = None
 
@@ -325,8 +336,6 @@ def getimage_name():
 	return name
 
 
-import os
-
 def getmDevices():
 	backup_paths = [
 		'/media/usb', '/media/usb1', '/media/hdd', '/media/hdd2',
@@ -348,4 +357,3 @@ def getmDevices():
 				mdevices.append((backup_dir, backup_dir))
 
 	return mdevices
-

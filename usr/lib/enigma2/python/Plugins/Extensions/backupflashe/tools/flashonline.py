@@ -17,7 +17,7 @@ import os
 
 # python3
 from .compat import PY3
-from .skin import *
+from .skin import SKIN_doFlash
 from .Console import Console
 from .download import imagedownloadScreen
 from .bftools import logdata, getboxtype, get_images, get_images_mediafire, copylog
@@ -39,9 +39,9 @@ class teamsScreen(Screen):
         self['list'] = MenuList([])
         self['path'] = Label(" ")
         self['actions'] = ActionMap(['WizardActions', 'ColorActions'], {'red': self.close,
-                                     'green': self.load_images,
-                                     'ok': self.load_images,
-                                     'back': self.close})
+                                                                        'green': self.load_images,
+                                                                        'ok': self.load_images,
+                                                                        'back': self.close})
         self['key_green'].hide()
         self.teams = []
         self.list = []
@@ -104,6 +104,7 @@ class teamsScreen(Screen):
         teams.append((_("BlackHole"), "BlackHole"))
         teams.append((_("OpenTSimage"), "OpenTSimage"))
         teams.append((_("OpenPLI-Unoffical"), "OpenPLI-Unoffical"))
+        teams.append((_("OpenBH-Unoffical"), "OpenBH-Unoffical"))
         teams.append((_("OpenATV"), "OpenATV-Python3"))
         teams.append((_("OpenVIX"), "OpenVIX"))
         teams.append((_("PurE2"), "PurE2"))
@@ -153,9 +154,9 @@ class imagesScreen(Screen):
         self['path'] = Label(" ")
         self.imageok = False
         self['actions'] = ActionMap(['WizardActions', 'ColorActions'], {'red': self.close,
-         'green': self.download,
-         'ok': self.download,
-         'back': self.close})
+                                                                        'green': self.download,
+                                                                        'ok': self.download,
+                                                                        'back': self.close})
         self.teams = []
         self.imageok = False
         self.canflash = True
@@ -226,7 +227,7 @@ class imagesScreen(Screen):
         if self.teamName == "OpenATV-Python2":
             imagesPath = "https://images.mynonpublic.com/openatv/6.4/index.php?open=" + boxtype
             regx = b'''<a href='(.*?)'>(.*?)</a>'''
-            rimages=get_images(imagesPath, regx)
+            rimages = get_images(imagesPath, regx)
             for item in rimages:
                 imageName = item[1]
                 imageName2 = item[0]
@@ -245,7 +246,7 @@ class imagesScreen(Screen):
                 imageName = item[1]
                 imageName2 = item[0]
                 if PY3:
-                    imageName=imageName.decode()
+                    imageName = imageName.decode()
                     imagePath = os.path.join(b'https://images.mynonpublic.com/openatv/7.5/', imageName2)
                 else:
                     imagePath = os.path.join('https://images.mynonpublic.com/openatv/7.5/', imageName2)
@@ -273,6 +274,16 @@ class imagesScreen(Screen):
 
         if self.teamName == "TeamBlue":
             imagesPath = 'https://www.mediafire.com/api/1.4/folder/get_content.php?r=cfgd&content_type=files&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.5&folder_key=nzy14rrzawbw4&response_format=json'
+            rimages = get_images_mediafire(imagesPath)
+            for item in rimages:
+                imageName = item[0]
+                imagePath = item[1]
+                if boxtype not in imageName:
+                    continue
+                images.append((imageName, imagePath))
+
+        if self.teamName == "OpenBH-Unoffical":
+            imagesPath = 'https://www.mediafire.com/api/1.4/folder/get_content.php?r=cfgd&content_type=files&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.5&folder_key=sdvi12arjgsuj&response_format=json'
             rimages = get_images_mediafire(imagesPath)
             for item in rimages:
                 imageName = item[0]
