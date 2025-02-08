@@ -114,7 +114,7 @@ elif os.path.isdir("/media/at"):
 elif os.path.isdir("/media/egamiboot/EgamiBootI"):
 	IMAGLISTEPATH = "/media/egamiboot/EgamiBootI"  # Directory of Egami images
 	ExternalImages = True
-	TEXT_CHOOSE = _("Images from AlanTuring")
+	TEXT_CHOOSE = _("Images from EgamiBoot")
 elif os.path.isdir(''.join(searchPaths)):
 	# Directory of OpenMultiboot/NeoBoot images
 	IMAGLISTEPATH = ''.join(searchPaths)
