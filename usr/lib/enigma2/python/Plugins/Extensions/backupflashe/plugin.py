@@ -3,6 +3,13 @@
 
 # RAED & mfaraj57 (c) 2018
 # Code RAED & mfaraj57
+
+from .tools.skin import SKIN_full_main
+from .tools.Console import Console
+from .tools.bftools import (logdata, dellog, getboxtype, getmDevices, trace_error, getversioninfo, getimage_name)
+from .tools.compat import PY3
+from .tools.backup import doBackUpInternal, doBackUpExternal
+
 from Components.ActionMap import ActionMap
 from Components.config import getConfigListEntry, ConfigSubsection, config, ConfigYesNo, ConfigSelection, configfile, ConfigText
 from Components.ConfigList import ConfigListScreen
@@ -18,11 +25,8 @@ from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Tools.Directories import resolveFilename, fileExists, SCOPE_MEDIA
 import datetime
 import os
-from .tools.skin import SKIN_full_main
-from .tools.Console import Console
-from .tools.bftools import (logdata, dellog, getboxtype, getmDevices, trace_error, getversioninfo, getimage_name)
-from .tools.compat import PY3
-from .tools.backup import doBackUpInternal, doBackUpExternal
+
+
 BRANDOS = '/var/lib/dpkg/status'  # DreamOS
 BAINIT = '/sbin/bainit'
 BAINFO = '/.bainfo'
@@ -105,20 +109,22 @@ elif os.path.isdir("/media/at"):
 elif os.path.isdir("/media/egamiboot/EgamiBootI"):
     IMAGLISTEPATH = "/media/egamiboot/EgamiBootI"  # Directory of Egami images
     ExternalImages = True
-    TEXT_CHOOSE = _("Images from AlanTuring")
-elif os.path.isdir(''.join(searchPaths)):
-    IMAGLISTEPATH = ''.join(searchPaths)  # Directory of OpenMultiboot/NeoBoot images
-    ExternalImages = True
-    if CHECKBOOT == "open-multiboot":
-        NAMEBOOT = "OpenMultiboot"
-    elif CHECKBOOT == "ImageBoot":
-        NAMEBOOT = "NeoBoot"
-    else:
-        NAMEBOOT = "Unknown"
-    TEXT_CHOOSE = _("Images from %s" % NAMEBOOT)
+    TEXT_CHOOSE = _("Images from EgamiBoot")
 else:
-    IMAGLISTEPATH = ""  # No Directory of image
-    ExternalImages = False
+    IMAGLISTEPATH = next((p for p in searchPaths if os.path.isdir(p)), "")
+    ExternalImages = bool(IMAGLISTEPATH)
+    
+    if ExternalImages:
+        if CHECKBOOT == "open-multiboot":
+            NAMEBOOT = "OpenMultiboot"
+        elif CHECKBOOT == "ImageBoot":
+            NAMEBOOT = "NeoBoot"
+        else:
+            NAMEBOOT = "Unknown"
+        TEXT_CHOOSE = _("Images from %s" % NAMEBOOT)
+    else:
+        TEXT_CHOOSE = ""
+
 ####
 
 
@@ -140,7 +146,12 @@ class full_main(Screen, ConfigListScreen):
         self["key_blue"].hide()
         self["key_yellow"].hide()
         self["help"] = StaticText()
-        self["actions"] = ActionMap(["WizardActions", "ColorActions", "MenuActions"],
+        self["actions"] = ActionMap(
+            [
+                "WizardActions",
+                "ColorActions",
+                "MenuActions"
+            ],
             {
                 "green": self.doFlash,
                 "blue": self.BackUpListSelect,
@@ -148,7 +159,8 @@ class full_main(Screen, ConfigListScreen):
                 "menu": self.showMenuoptions,
                 "red": self.red,
                 "back": self.close
-            })
+            }
+        )
         self.deviceok = True
         self.new_version = Ver
         self.timer = eTimer()

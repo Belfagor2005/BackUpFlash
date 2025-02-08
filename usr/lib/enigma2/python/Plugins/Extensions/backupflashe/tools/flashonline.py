@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# RAED & mfaraj57 &  (c) 2018
+# RAED & mfaraj57 &  (c) 2025
 # Code RAED & mfaraj57
 
 from enigma import eTimer
@@ -38,10 +38,18 @@ class teamsScreen(Screen):
         self['lab1'] = Label('Select team')
         self['list'] = MenuList([])
         self['path'] = Label(" ")
-        self['actions'] = ActionMap(['WizardActions', 'ColorActions'], {'red': self.close,
-                                                                        'green': self.load_images,
-                                                                        'ok': self.load_images,
-                                                                        'back': self.close})
+        self['actions'] = ActionMap(
+            [
+                'WizardActions',
+                'ColorActions'
+            ],
+            {
+                'red': self.close,
+                'green': self.load_images,
+                'ok': self.load_images,
+                'back': self.close
+            }
+        )
         self['key_green'].hide()
         self.teams = []
         self.list = []
@@ -107,16 +115,17 @@ class teamsScreen(Screen):
         teams.append((_("OpenBH-Unoffical"), "OpenBH-Unoffical"))
         teams.append((_("OpenATV"), "OpenATV-Python3"))
         teams.append((_("OpenVIX"), "OpenVIX"))
+        teams.append((_("OpenVIX-Unoffical"), "OpenVIX-Unoffical"))
         teams.append((_("PurE2"), "PurE2"))
-        teams.append((_("OpenVision"), "OpenVision"))
-        teams.append((_("TeamBlue"), "TeamBlue"))
-        # teams.append((_("Open-cobralibero"), "Open-cobralibero Python3"))
-        teams.append((_("________________ Python2 Images ________________"), ))
-        teams.append((_("OpenATV"), "OpenATV-Python2"))
-        teams.append((_("AFF-TitanNit"), "AFF-TitanNit"))
         teams.append((_("OpenSatlodge"), "OpenSatlodge"))
+        teams.append((_("TeamBlue"), "TeamBlue"))
         teams.append((_("OpenHDF"), "OpenHDF"))
-        teams.append((_("NonSoloSat"), "NonSoloSat"))
+        teams.append((_("AFF-TitanNit"), "AFF-TitanNit"))
+        teams.append((_("OpenVision"), "OpenVision"))
+        # teams.append((_("Open-cobralibero"), "Open-cobralibero Python3"))
+        # teams.append((_("________________ Python2 Images ________________"), ))
+        # teams.append((_("OpenATV"), "OpenATV-Python2"))
+        # teams.append((_("NonSoloSat"), "NonSoloSat"))
         # teams.append((_("ArEaDeLtA-SaT"), "ArEaDeLtA-SaT")) ## No more Team
         # teams.append((_("OpenESI"), "OpenESI")) ## No more Team
         # teams.append((_("Openeight-Unoffical"), "Openeight-Unoffical")) ## No more update images
@@ -153,10 +162,18 @@ class imagesScreen(Screen):
         self['list'] = MenuList([])
         self['path'] = Label(" ")
         self.imageok = False
-        self['actions'] = ActionMap(['WizardActions', 'ColorActions'], {'red': self.close,
-                                                                        'green': self.download,
-                                                                        'ok': self.download,
-                                                                        'back': self.close})
+        self['actions'] = ActionMap(
+            [
+                'WizardActions',
+                'ColorActions'
+            ],
+            {
+                'red': self.close,
+                'green': self.download,
+                'ok': self.download,
+                'back': self.close
+            }
+        )
         self.teams = []
         self.imageok = False
         self.canflash = True
@@ -524,7 +541,7 @@ class imagesScreen(Screen):
                     imagePath = os.path.join('http://webplus.sat-lodge.it/Dreambox920/', imageName)
                 else:
                     imagePath = os.path.join('http://webplus.sat-lodge.it/Dreambox920/', imageName)
-                if not item[1].endswith(b".zip"):
+                if not item[1].endswith(b"unstable.tar.bz2"):
                     continue
                 images.append((imageName, imagePath))
 
@@ -589,16 +606,16 @@ class imagesScreen(Screen):
                 boxtype = 'DM920'
             else:
                 pass
-            imagesPath = "http://atemio.dyndns.tv/nightly-images/Dreambox/" + boxtype + "/v2.03/"
+            imagesPath = "http://atemio.dyndns.tv/nightly-images/Dreambox/" + boxtype + "/v2.04/"
             regx = b'''<a href="(.*?)">(.*?)</a>'''
             rimages = get_images(imagesPath, regx)
             for item in rimages:
                 imageName = item[1]
                 if PY3:
                     imageName = imageName.decode()
-                    imagePath = os.path.join("http://atemio.dyndns.tv/nightly-images/Dreambox/" + boxtype + "/v2.03/", imageName)
+                    imagePath = os.path.join("http://atemio.dyndns.tv/nightly-images/Dreambox/" + boxtype + "/v2.04/", imageName)
                 else:
-                    imagePath = os.path.join("http://atemio.dyndns.tv/nightly-images/Dreambox/" + boxtype + "/v2.03/", imageName)
+                    imagePath = os.path.join("http://atemio.dyndns.tv/nightly-images/Dreambox/" + boxtype + "/v2.04/", imageName)
                 if not item[0].endswith(b".zip"):
                     continue
                 images.append((imageName, imagePath))
@@ -729,6 +746,15 @@ class imagesScreen(Screen):
                 else:
                     imagePath = os.path.join('https://www.openvix.co.uk/openvix-builds/' + boxtype + '/', imageName + '.release-' + boxtype + '_mmc.zip')
                 images.append((imageName, imagePath))
+        if self.teamName == "OpenVIX-Unoffical":
+            imagesPath = 'https://www.mediafire.com/api/1.4/folder/get_content.php?r=cfgd&content_type=files&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.5&folder_key=q1ds8bogfa994&response_format=json'
+            rimages = get_images_mediafire(imagesPath)
+            for item in rimages:
+                imageName = item[0]
+                imagePath = item[1]
+                if boxtype not in imageName:
+                    continue
+                images.append((imageName, imagePath))
 
         return images
 
@@ -765,15 +791,15 @@ class imagesScreen(Screen):
         if not config.backupflashe.flashAllow.value and (os.path.exists("/.bainfo") or os.path.exists("/.lfinfo") or cmd.find(rootfs) == -1):
             self.session.open(MessageBox, "You Disable To flash new image from External image.\nSo Flashing works only in Flash image", MessageBox.TYPE_ERROR)
         else:
-            from .tools.flash import flashScript
+            # from .tools.flash import flashScript
             if self.imageok is False:
                 return
             mytitle = _('Do Flash Images')
             idx = self['list'].getSelectionIndex()
             imageLink = self.images[idx][1]
             IMAGENAME = os.path.split(imageLink)[1]
-            IMAGEPATH = self.device_path + IMAGENAME
-            command = flashScript(IMAGENAME, self.device_path)
+            # IMAGEPATH = self.device_path + IMAGENAME
+            # command = flashScript(IMAGENAME, self.device_path)
             script_backupflash = "/tmp/backupflash.sh"
             self.session.open(Console, title=mytitle, cmdlist=[script_backupflash])
             copylog(self.device_path)
