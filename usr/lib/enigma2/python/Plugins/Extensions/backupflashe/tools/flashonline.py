@@ -739,12 +739,12 @@ class imagesScreen(Screen):
 			rimages = get_images(imagesPath, regx)
 			# logdata("rimages",rimages)
 			for item in rimages:
-				imageName = item[1]
+				imageName = item[0]
 				if PY3:
 					imageName = imageName.decode()
-					imagePath = os.path.join('https://www.openvix.co.uk/openvix-builds/' + boxtype + '/', imageName + '.release-' + boxtype + '_mmc.zip')
+					imagePath = os.path.join('https://www.openvix.co.uk/openvix-builds/' + boxtype + '/', imageName)
 				else:
-					imagePath = os.path.join('https://www.openvix.co.uk/openvix-builds/' + boxtype + '/', imageName + '.release-' + boxtype + '_mmc.zip')
+					imagePath = os.path.join('https://www.openvix.co.uk/openvix-builds/' + boxtype + '/', imageName)
 				images.append((imageName, imagePath))
 		if self.teamName == "OpenVIX-Unoffical":
 			imagesPath = 'https://www.mediafire.com/api/1.4/folder/get_content.php?r=cfgd&content_type=files&filter=all&order_by=name&order_direction=asc&chunk=1&version=1.5&folder_key=q1ds8bogfa994&response_format=json'
@@ -795,9 +795,9 @@ class imagesScreen(Screen):
 			if self.imageok is False:
 				return
 			mytitle = _('Do Flash Images')
-			idx = self['list'].getSelectionIndex()
-			imageLink = self.images[idx][1]
-			IMAGENAME = os.path.split(imageLink)[1]
+			# idx = self['list'].getSelectionIndex()
+			# imageLink = self.images[idx][1]
+			# IMAGENAME = os.path.split(imageLink)[1]
 			# IMAGEPATH = self.device_path + IMAGENAME
 			# command = flashScript(IMAGENAME, self.device_path)
 			script_backupflash = "/tmp/backupflash.sh"
